@@ -4,17 +4,148 @@
  */
 package presentacion;
 
+import dto.cliente.ClienteFiltroTablaDTO;
+import dto.cliente.ClienteTablaDTO;
+import enumerador.ClienteCRUDEnumerador;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import negocio.IClienteNegocio;
+import negocio.NegocioException;
+import utilerias.JButtonCellEditor;
+import utilerias.JButtonRenderer;
+
 /**
  *
  * @author eduar
  */
 public class frmCliente extends javax.swing.JFrame {
+    
+    private IClienteNegocio clienteNegocio;
+    private int pagina = 1;
+    private final int LIMITE = 20;
 
-    /**
-     * Creates new form frmCliente
-     */
-    public frmCliente() {
+    public frmCliente(IClienteNegocio clienteNegocio) {
         initComponents();
+
+        this.clienteNegocio = clienteNegocio;
+
+        this.metodosIniciales();
+    }
+
+    private void metodosIniciales() {
+        this.cargarConfiguracionInicialPantalla();
+        this.cargarConfiguracionInicialTablaClientes();
+        this.cargarTablaClientes();
+    }
+
+    private void cargarConfiguracionInicialPantalla() {
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
+
+    private void cargarConfiguracionInicialTablaClientes() {
+        ActionListener onEditarClickListener = new ActionListener() {
+            final int columnaId = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Metodo para editar
+                editar();
+            }
+        };
+        int indiceColumnaEditar = 5;
+        TableColumnModel modeloColumnas = this.tblClientes.getColumnModel();
+        modeloColumnas.getColumn(indiceColumnaEditar)
+                .setCellRenderer(new JButtonRenderer("Editar"));
+        modeloColumnas.getColumn(indiceColumnaEditar)
+                .setCellEditor(new JButtonCellEditor("Editar", onEditarClickListener));
+
+        ActionListener onEliminarClickListener = new ActionListener() {
+            final int columnaId = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Metodo para eliminar
+                eliminar();
+            }
+        };
+        int indiceColumnaEliminar = 6;
+        modeloColumnas = this.tblClientes.getColumnModel();
+        modeloColumnas.getColumn(indiceColumnaEliminar)
+                .setCellRenderer(new JButtonRenderer("Eliminar"));
+        modeloColumnas.getColumn(indiceColumnaEliminar)
+                .setCellEditor(new JButtonCellEditor("Eliminar", onEliminarClickListener));
+    }
+
+    private int getIdSeleccionadoTablaClientes() {
+        int indiceFilaSeleccionada = this.tblClientes.getSelectedRow();
+        if (indiceFilaSeleccionada != -1) {
+            DefaultTableModel modelo = (DefaultTableModel) this.tblClientes.getModel();
+            int indiceColumnaId = 0;
+            int idSocioSeleccionado = (int) modelo.getValueAt(indiceFilaSeleccionada,
+                    indiceColumnaId);
+            return idSocioSeleccionado;
+        } else {
+            return 0;
+        }
+    }
+
+    private void editar() {
+        int id = this.getIdSeleccionadoTablaClientes();
+        System.out.println("El id para editar es " + id);
+    }
+
+    private void eliminar() {
+        int id = this.getIdSeleccionadoTablaClientes();
+        System.out.println("El id para eliminar es " + id);
+    }
+
+    private void BorrarRegistrosTablaClientes() {
+        DefaultTableModel modeloTabla = (DefaultTableModel) this.tblClientes.getModel();
+        if (modeloTabla.getRowCount() > 0) {
+            for (int row = modeloTabla.getRowCount() - 1; row > -1; row--) {
+                modeloTabla.removeRow(row);
+            }
+        }
+    }
+
+    private void AgregarRegistrosTablaCliente(List<ClienteTablaDTO> clientesLista) {
+        if (clientesLista == null) {
+            return;
+        }
+
+        DefaultTableModel modeloTabla = (DefaultTableModel) this.tblClientes.getModel();
+        clientesLista.forEach(row -> {
+            Object[] fila = new Object[5];
+            fila[0] = row.getIdcliente();
+            fila[1] = row.getNombres();
+            fila[2] = row.getApellidoPaterno();
+            fila[3] = row.getApellidoMaterno();
+            fila[4] = row.getEstatus();
+
+            modeloTabla.addRow(fila);
+        });
+    }
+
+    private void cargarTablaClientes() {
+        try {
+            ClienteFiltroTablaDTO filtro = this.obtenerFiltrosTabla();
+            List<ClienteTablaDTO> clientesLista = this.clienteNegocio.buscarClientesTabla(filtro);
+            this.BorrarRegistrosTablaClientes();
+            this.AgregarRegistrosTablaCliente(clientesLista);
+        } catch (NegocioException ex) {
+            this.BorrarRegistrosTablaClientes();
+            this.pagina--;
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Información", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private ClienteFiltroTablaDTO obtenerFiltrosTabla() {
+        return new ClienteFiltroTablaDTO(this.LIMITE, this.pagina, txtFiltro.getText());
     }
 
     /**
@@ -28,14 +159,15 @@ public class frmCliente extends javax.swing.JFrame {
 
         lblAdministracion = new javax.swing.JLabel();
         lblFiltro = new javax.swing.JLabel();
-        txtBuscar = new javax.swing.JTextField();
+        txtFiltro = new javax.swing.JTextField();
         btnBuscar = new javax.swing.JButton();
         btnNuevo = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tablaClientes = new javax.swing.JTable();
-        btnAnterior = new javax.swing.JButton();
-        btnSiguiente = new javax.swing.JButton();
-        lblPagina = new javax.swing.JLabel();
+        tblClientes = new javax.swing.JTable();
+        btnPaginaAnterior = new javax.swing.JButton();
+        btnPaginaSiguiente = new javax.swing.JButton();
+        lblNumeroPagina = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -44,17 +176,27 @@ public class frmCliente extends javax.swing.JFrame {
 
         lblFiltro.setText("Filtro de busqueda");
 
-        txtBuscar.addActionListener(new java.awt.event.ActionListener() {
+        txtFiltro.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtBuscarActionPerformed(evt);
+                txtFiltroActionPerformed(evt);
             }
         });
 
         btnBuscar.setText("Buscar");
+        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarActionPerformed(evt);
+            }
+        });
 
         btnNuevo.setText("Nuevo");
+        btnNuevo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNuevoActionPerformed(evt);
+            }
+        });
 
-        tablaClientes.setModel(new javax.swing.table.DefaultTableModel(
+        tblClientes.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null},
@@ -67,13 +209,23 @@ public class frmCliente extends javax.swing.JFrame {
                 "id", "nombres", "paterno", "materno", "estatus", "editar", "eliminar"
             }
         ));
-        jScrollPane1.setViewportView(tablaClientes);
+        jScrollPane1.setViewportView(tblClientes);
 
-        btnAnterior.setText("Anterior");
+        btnPaginaAnterior.setText("Anterior");
+        btnPaginaAnterior.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPaginaAnteriorActionPerformed(evt);
+            }
+        });
 
-        btnSiguiente.setText("Siguiente");
+        btnPaginaSiguiente.setText("Siguiente");
+        btnPaginaSiguiente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPaginaSiguienteActionPerformed(evt);
+            }
+        });
 
-        lblPagina.setText("Página 1");
+        lblNumeroPagina.setText("Página 1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -92,15 +244,16 @@ public class frmCliente extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnAnterior)
+                                .addComponent(btnPaginaAnterior)
                                 .addGap(212, 212, 212)
-                                .addComponent(lblPagina)
+                                .addComponent(lblNumeroPagina)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnSiguiente))
+                                .addComponent(btnPaginaSiguiente))
                             .addComponent(jScrollPane1)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 520, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, 520, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                                 .addComponent(btnBuscar)))
                         .addGap(24, 24, 24))))
@@ -114,72 +267,71 @@ public class frmCliente extends javax.swing.JFrame {
                 .addComponent(lblFiltro)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnBuscar))
-                .addGap(30, 30, 30)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
                 .addComponent(btnNuevo)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAnterior)
-                    .addComponent(btnSiguiente)
-                    .addComponent(lblPagina))
+                    .addComponent(btnPaginaAnterior)
+                    .addComponent(btnPaginaSiguiente)
+                    .addComponent(lblNumeroPagina))
                 .addGap(23, 23, 23))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarActionPerformed
+    private void txtFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFiltroActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtBuscarActionPerformed
+    }//GEN-LAST:event_txtFiltroActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(frmCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(frmCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(frmCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(frmCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        this.cargarTablaClientes();
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
+    private void btnPaginaAnteriorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaginaAnteriorActionPerformed
+        // TODO add your handling code here:
+        this.pagina--;
+        if (this.pagina == 0) {
+            this.pagina = 1;
+            return;
         }
-        //</editor-fold>
+        lblNumeroPagina.setText("Página " + this.pagina);
+        this.cargarTablaClientes();
+    }//GEN-LAST:event_btnPaginaAnteriorActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new frmCliente().setVisible(true);
-            }
-        });
-    }
+    private void btnPaginaSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaginaSiguienteActionPerformed
+        // TODO add your handling code here:
+        this.pagina++;
+        lblNumeroPagina.setText("Página " + this.pagina);
+        this.cargarTablaClientes();
+    }//GEN-LAST:event_btnPaginaSiguienteActionPerformed
+
+    private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
+        // TODO add your handling code here:
+        frmClienteOpcion ins = new frmClienteOpcion(this, this.clienteNegocio, ClienteCRUDEnumerador.NUEVO);
+        ins.setVisible(true);
+        this.cargarTablaClientes();
+    }//GEN-LAST:event_btnNuevoActionPerformed
+
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAnterior;
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnNuevo;
-    private javax.swing.JButton btnSiguiente;
+    private javax.swing.JButton btnPaginaAnterior;
+    private javax.swing.JButton btnPaginaSiguiente;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblAdministracion;
     private javax.swing.JLabel lblFiltro;
-    private javax.swing.JLabel lblPagina;
-    private javax.swing.JTable tablaClientes;
-    private javax.swing.JTextField txtBuscar;
+    private javax.swing.JLabel lblNumeroPagina;
+    private javax.swing.JTable tblClientes;
+    private javax.swing.JTextField txtFiltro;
     // End of variables declaration//GEN-END:variables
 }
