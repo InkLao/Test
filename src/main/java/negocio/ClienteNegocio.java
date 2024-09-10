@@ -18,8 +18,8 @@ import persistencia.PersistenciaException;
  *
  * @author eduar
  */
-public class ClienteNegocio implements IClienteNegocio{
-    
+public class ClienteNegocio implements IClienteNegocio {
+
     private final IClienteDAO clienteDAO;
 
     public ClienteNegocio(IClienteDAO clienteDAO) {
@@ -57,5 +57,11 @@ public class ClienteNegocio implements IClienteNegocio{
     public List<ClienteDTO> obtenerClientesConFiltro(ClienteFiltroTablaDTO filtro) throws PersistenciaException {
         return clienteDAO.obtenerClientesConFiltro(filtro);
     }
-    
+
+    @Override
+    public List<ClienteTablaDTO> buscarClientesTabla(ClienteFiltroTablaDTO filtro) throws NegocioException {
+        // Aquí usas el clienteDAO para buscar los clientes con el filtro
+        return clienteDAO.obtenerClientesConFiltro(filtro);  // Asegúrate de tener este método en el DAO
+    }
+
 }

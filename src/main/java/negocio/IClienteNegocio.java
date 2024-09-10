@@ -27,4 +27,7 @@ public interface IClienteNegocio {
     void eliminarCliente(int idcliente) throws PersistenciaException;
     
     List<ClienteDTO> obtenerClientesConFiltro(ClienteFiltroTablaDTO filtro) throws PersistenciaException;
+    
+    List<ClienteTablaDTO> buscarClientesTabla(ClienteFiltroTablaDTO filtro) throws NegocioException;
+
 }
