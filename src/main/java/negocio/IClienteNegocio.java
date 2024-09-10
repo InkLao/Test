@@ -4,11 +4,13 @@
  */
 package negocio;
 
+import dto.cliente.ClienteDTO;
 import dto.cliente.ClienteFiltroTablaDTO;
 import dto.cliente.ClienteGuardarDTO;
 import dto.cliente.ClienteModificarDTO;
 import dto.cliente.ClienteTablaDTO;
 import java.util.List;
+import persistencia.PersistenciaException;
 
 /**
  *
@@ -16,9 +18,13 @@ import java.util.List;
  */
 public interface IClienteNegocio {
     
-    List<ClienteTablaDTO> buscarClientesTabla(ClienteFiltroTablaDTO filtro) throws NegocioException;
+    void guardarCliente(ClienteGuardarDTO cliente) throws PersistenciaException;
     
-    void guardar(ClienteGuardarDTO cliente) throws NegocioException;
+    ClienteDTO obtenerCliente(int idcliente) throws PersistenciaException;
     
-    void modificar(ClienteModificarDTO cliente) throws NegocioException;
+    void modificarCliente(ClienteModificarDTO cliente) throws PersistenciaException;
+    
+    void eliminarCliente(int idcliente) throws PersistenciaException;
+    
+    List<ClienteDTO> obtenerClientesConFiltro(ClienteFiltroTablaDTO filtro) throws PersistenciaException;
 }

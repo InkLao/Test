@@ -4,6 +4,7 @@
  */
 package negocio;
 
+import dto.cliente.ClienteDTO;
 import dto.cliente.ClienteFiltroTablaDTO;
 import dto.cliente.ClienteGuardarDTO;
 import dto.cliente.ClienteModificarDTO;
@@ -18,36 +19,43 @@ import persistencia.PersistenciaException;
  * @author eduar
  */
 public class ClienteNegocio implements IClienteNegocio{
-
-    private IClienteDAO clienteDAO;
     
+    private final IClienteDAO clienteDAO;
+
     public ClienteNegocio(IClienteDAO clienteDAO) {
         this.clienteDAO = clienteDAO;
     }
-    
-    public void guardar() throws NegocioException {
-        try {
-            System.out.println("Paso por negocio del cliente " + LocalDateTime.now());
-            this.clienteDAO.guardar();
-        } catch (PersistenciaException ex) {
-            throw new NegocioException(ex.getMessage());
+
+    @Override
+    public void guardarCliente(ClienteGuardarDTO cliente) throws PersistenciaException {
+        // Puedes agregar validaciones de negocio aquí si es necesario
+        clienteDAO.guardarCliente(cliente);
+    }
+
+    @Override
+    public ClienteDTO obtenerCliente(int idcliente) throws PersistenciaException {
+        return clienteDAO.obtenerCliente(idcliente);
+    }
+
+    @Override
+    public void modificarCliente(ClienteModificarDTO cliente) throws PersistenciaException {
+        // Puedes agregar validaciones de negocio aquí si es necesario
+        clienteDAO.modificarCliente(cliente);
+    }
+
+    @Override
+    public void eliminarCliente(int idcliente) throws PersistenciaException {
+        // Ejemplo de validación de negocio antes de eliminar
+        ClienteDTO cliente = clienteDAO.obtenerCliente(idcliente);
+        if (cliente == null) {
+            throw new PersistenciaException("El cliente con id " + idcliente + " no existe.");
         }
-        
+        clienteDAO.eliminarCliente(idcliente);
     }
 
     @Override
-    public List<ClienteTablaDTO> buscarClientesTabla(ClienteFiltroTablaDTO filtro) throws NegocioException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void guardar(ClienteGuardarDTO cliente) throws NegocioException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void modificar(ClienteModificarDTO cliente) throws NegocioException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public List<ClienteDTO> obtenerClientesConFiltro(ClienteFiltroTablaDTO filtro) throws PersistenciaException {
+        return clienteDAO.obtenerClientesConFiltro(filtro);
     }
     
 }

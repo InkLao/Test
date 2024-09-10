@@ -10,7 +10,13 @@ package persistencia;
  */
 public class PersistenciaException extends Exception {
     
+    // Constructor con mensaje
     public PersistenciaException(String mensaje) {
         super(mensaje);
+    }
+
+    // Constructor con mensaje y causa
+    public PersistenciaException(String mensaje, Throwable causa) {
+        super(mensaje, causa);
     }
 }
