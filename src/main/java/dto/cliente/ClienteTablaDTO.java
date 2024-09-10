@@ -13,6 +13,7 @@ public class ClienteTablaDTO {
     private String nombres;
     private String apellidoPaterno;
     private String apellidoMaterno;
+    private String estatus;
 
     public ClienteTablaDTO() {}
 
@@ -21,6 +22,7 @@ public class ClienteTablaDTO {
         this.nombres = nombres;
         this.apellidoPaterno = apellidoPaterno;
         this.apellidoMaterno = apellidoMaterno;
+        
     }
 
     // Getters y setters
@@ -55,4 +57,13 @@ public class ClienteTablaDTO {
     public void setApellidoMaterno(String apellidoMaterno) {
         this.apellidoMaterno = apellidoMaterno;
     }
+
+    public String getEstatus() {
+        return estatus;
+    }
+
+    public void setEstatus(String estatus) {
+        this.estatus = estatus;
+    }
+    
 }

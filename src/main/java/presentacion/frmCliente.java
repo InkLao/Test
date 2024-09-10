@@ -143,6 +143,7 @@ public class frmCliente extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Información", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
 
     private ClienteFiltroTablaDTO obtenerFiltrosTabla() {
         return new ClienteFiltroTablaDTO(this.LIMITE, this.pagina, txtFiltro.getText());
